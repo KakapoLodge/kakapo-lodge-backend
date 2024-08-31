@@ -45,11 +45,10 @@ async function getAuthorizationValue(baseURL) {
 }
 
 function constructSMTPRequestBody(args) {
+  const emailHTML = constructEmailHTML(args);
   const { email, phone, name, message } = args;
 
-  const emailHTML = constructEmailHTML(args);
-
-  return {
+  const requestBody = {
     email: {
       html: btoa(emailHTML),
       text: `Email: ${email}\nPhone: ${phone}\nName: ${name}\nMessage:\n${message}`,
@@ -66,6 +65,19 @@ function constructSMTPRequestBody(args) {
       ],
     },
   };
+
+  const copy = args.copy || false;
+
+  if (copy) {
+    requestBody.email.bcc = [
+      {
+        name: name,
+        email: email,
+      }
+    ]
+  }
+
+  return requestBody;
 }
 
 function constructEmailHTML(args) {
@@ -127,6 +139,16 @@ function constructEmailHTML(args) {
       #message {
         text-align: justify;
       }
+
+      #separator {
+        width: 100%;
+        color: #8c9b3e;
+      }
+
+      #footnote {
+        text-align: center;
+        color: #8c9b3e;
+      }
     </style>
   </head>
 
@@ -174,6 +196,12 @@ function constructEmailHTML(args) {
 
     <div id="message">
       ${message}
+    </div>
+
+    <hr id="separator" />
+
+    <div id="footnote">
+      If you have any further enquiries, please send an email to stay@kakapolodge.co.nz
     </div>
   </body>
 </html>
